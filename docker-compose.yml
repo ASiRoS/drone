@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  php:
+    build:
+      context: .
+      dockerfile: docker/php.Dockerfile
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+      - ./docker/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+      - vendor:/var/www/vendor
+    environment:
+      PHP_IDE_CONFIG: "serverName=drone"
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+
+  redis:
+    image: redis:6.0
+    restart: unless-stopped
+    ports:
+      - "6382:6379"
+
+volumes:
+  vendor:
